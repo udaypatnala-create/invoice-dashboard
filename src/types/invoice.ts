@@ -21,7 +21,22 @@ export interface InvoiceRow {
   platform: string;
   salesContact: string;
   year: number;
-  // parsed ISO dates for filtering
-  invoiceDateParsed: string | null; // ISO string
+  sheetTab: SheetTab;
+  invoiceDateParsed: string | null;
   startDateParsed: string | null;
 }
+
+export type SheetTab =
+  | 'india'
+  | 'foreign'
+  | 'google_networks'
+  | 'pg_sales'
+  | 'pg_deals';
+
+export const TAB_LABELS: Record<SheetTab, string> = {
+  india: '🇮🇳 India Campaigns',
+  foreign: '🌍 Foreign Campaigns',
+  google_networks: '🔗 Google & Networks',
+  pg_sales: '📈 PG Sales',
+  pg_deals: '🤝 PG Deals',
+};

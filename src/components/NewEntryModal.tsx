@@ -1,9 +1,12 @@
 'use client';
 import React, { useState } from 'react';
+import type { SheetTab } from '@/types/invoice';
+import { TAB_LABELS } from '@/types/invoice';
 
 interface NewEntryModalProps {
   onClose: () => void;
   onSaved: () => void;
+  defaultTab?: SheetTab;
 }
 
 const STATUS_OPTIONS = [
@@ -16,8 +19,9 @@ const STATUS_OPTIONS = [
 
 const PLATFORM_OPTIONS = ['Mobile', 'Desktop', 'CTV', 'Other'];
 
-export default function NewEntryModal({ onClose, onSaved }: NewEntryModalProps) {
+export default function NewEntryModal({ onClose, onSaved, defaultTab = 'india' }: NewEntryModalProps) {
   const [form, setForm] = useState({
+    sheetTab: defaultTab,
     month: '',
     year: '2026',
     clientName: '',
@@ -99,11 +103,15 @@ export default function NewEntryModal({ onClose, onSaved }: NewEntryModalProps) 
             </div>
           )}
 
-          {/* Row 1 */}
+          {/* Row 0 – Sheet + Year */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className={labelCls}>Month & Year *</label>
-              <input type="month" value={form.month} onChange={set('month')} className={inputCls} required />
+              <label className={labelCls}>Sheet / Category</label>
+              <select value={form.sheetTab} onChange={set('sheetTab')} className={inputCls}>
+                {(Object.entries(TAB_LABELS) as [string, string][]).map(([key, label]) => (
+                  <option key={key} value={key}>{label}</option>
+                ))}
+              </select>
             </div>
             <div>
               <label className={labelCls}>File Year</label>
@@ -112,6 +120,12 @@ export default function NewEntryModal({ onClose, onSaved }: NewEntryModalProps) 
                 <option value="2026">2026 File</option>
               </select>
             </div>
+          </div>
+
+          {/* Row 1 – Month */}
+          <div>
+            <label className={labelCls}>Month & Year *</label>
+            <input type="month" value={form.month} onChange={set('month')} className={inputCls} required />
           </div>
 
           {/* Row 2 */}
