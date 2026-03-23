@@ -8,7 +8,7 @@ interface SummaryDashboardProps {
   allRows: InvoiceRow[];
 }
 
-const SHEET_TABS: SheetTab[] = ['india', 'foreign', 'google_networks', 'pg_sales', 'pg_deals'];
+const SHEET_TABS: SheetTab[] = ['india', 'foreign', 'google_networks', 'pg_sales'];
 
 const STATUS_COLORS: Record<string, string> = {
   'Completed': 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400 dark:border-green-800',

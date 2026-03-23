@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/firebase';
-import { collection, getDocs, addDoc, updateDoc, doc } from 'firebase/firestore';
+import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -37,6 +37,19 @@ export async function PATCH(req: NextRequest) {
     const { rowId, updates } = body;
     const docRef = doc(db, 'invoices', rowId);
     await updateDoc(docRef, updates);
+    return NextResponse.json({ success: true });
+  } catch (e: any) {
+    return NextResponse.json({ success: false, error: String(e) }, { status: 500 });
+  }
+}
+
+export async function DELETE(req: NextRequest) {
+  try {
+    const url = new URL(req.url);
+    const rowId = url.searchParams.get('rowId');
+    if (!rowId) throw new Error('Missing rowId');
+    
+    await deleteDoc(doc(db, 'invoices', rowId));
     return NextResponse.json({ success: true });
   } catch (e: any) {
     return NextResponse.json({ success: false, error: String(e) }, { status: 500 });

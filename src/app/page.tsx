@@ -9,7 +9,7 @@ import SummaryDashboard from '@/components/SummaryDashboard';
 import type { InvoiceRow, SheetTab } from '@/types/invoice';
 import { TAB_LABELS } from '@/types/invoice';
 
-const SHEET_TABS: SheetTab[] = ['india', 'foreign', 'google_networks', 'pg_sales', 'pg_deals'];
+const SHEET_TABS: SheetTab[] = ['india', 'foreign', 'google_networks', 'pg_sales'];
 
 function applyTimeFilter(
   rows: InvoiceRow[],

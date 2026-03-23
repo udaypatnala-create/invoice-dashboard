@@ -3,7 +3,7 @@ import React from 'react';
 import type { SheetTab } from '@/types/invoice';
 import { TAB_LABELS } from '@/types/invoice';
 
-const TABS: SheetTab[] = ['india', 'foreign', 'google_networks', 'pg_sales', 'pg_deals'];
+const TABS: SheetTab[] = ['india', 'foreign', 'google_networks', 'pg_sales'];
 
 interface SheetTabsProps {
   active: SheetTab | 'summary';

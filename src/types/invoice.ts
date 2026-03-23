@@ -39,13 +39,11 @@ export type SheetTab =
   | 'india'
   | 'foreign'
   | 'google_networks'
-  | 'pg_sales'
-  | 'pg_deals';
+  | 'pg_sales';
 
 export const TAB_LABELS: Record<SheetTab, string> = {
   india: '🇮🇳 India Campaigns',
   foreign: '🌍 Foreign Campaigns',
-  google_networks: '🔗 Google & Networks',
-  pg_sales: '📈 PG Sales',
-  pg_deals: '🤝 PG Deals',
+  google_networks: '🌐 Google & Networks',
+  pg_sales: '💻 PG Sales/FC',
 };

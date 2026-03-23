@@ -113,6 +113,21 @@ export default function InvoiceTable({ rows, activeTab, onRowUpdated }: InvoiceT
     });
   }
 
+  const handleDelete = async (rowId: string) => {
+    if (window.confirm("Are you sure you want to delete this record?")) {
+      if (window.confirm("DOUBLE CONFIRMATION: The record will be permanently deleted from the cloud database. Click OK to proceed.")) {
+        try {
+          const res = await fetch(`/api/invoices?rowId=${rowId}`, { method: 'DELETE' });
+          const json = await res.json();
+          if (json.success) onRowUpdated();
+          else alert('Delete failed: ' + json.error);
+        } catch {
+          alert('Network error while deleting.');
+        }
+      }
+    }
+  };
+
   const saveEdit = useCallback(async (row: InvoiceRow) => {
     if (!editState) return;
     setSaving(true);
@@ -344,12 +359,20 @@ export default function InvoiceTable({ rows, activeTab, onRowUpdated }: InvoiceT
                     ))}
                     <td className="px-4 py-3 whitespace-nowrap">
                       {!isEditing && (
-                        <button
-                          onClick={() => startEdit(row)}
-                          className="px-3 py-1 text-xs font-semibold bg-blue-50 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/60 transition-colors"
-                        >
-                          ✏️ Edit
-                        </button>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => startEdit(row)}
+                            className="px-3 py-1 text-xs font-semibold bg-blue-50 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/60 transition-colors"
+                          >
+                            ✏️ Edit
+                          </button>
+                          <button
+                            onClick={() => handleDelete(row.id)}
+                            className="px-3 py-1 text-xs font-semibold bg-red-50 dark:bg-red-900/40 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/60 transition-colors"
+                          >
+                            🗑️ Delete
+                          </button>
+                        </div>
                       )}
                       {isEditing && (
                         <div className="flex gap-1">
