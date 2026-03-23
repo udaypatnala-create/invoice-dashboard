@@ -47,6 +47,7 @@ export default function NewEntryModal({ onClose, onSaved, defaultTab = 'india', 
   const [form, setForm] = useState({
     sheetTab: defaultTab,
     month: '',
+    monthRaw: '',
     year: '2026',
     clientName: '',
     campaignName: '',
@@ -75,12 +76,12 @@ export default function NewEntryModal({ onClose, onSaved, defaultTab = 'india', 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // Hydrate form if editing
   useEffect(() => {
     if (editData) {
       setForm({
         sheetTab: editData.sheetTab || defaultTab,
         month: editData.month || '',
+        monthRaw: toMonthInput(editData.month || ''),
         year: String(editData.year || '2026'),
         clientName: editData.clientName || '',
         campaignName: editData.campaignName || '',
@@ -134,7 +135,9 @@ export default function NewEntryModal({ onClose, onSaved, defaultTab = 'india', 
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!form.clientName || !form.month) {
+    const finalMonth = fromMonthInput(form.monthRaw);
+    
+    if (!form.clientName || !finalMonth) {
       setError('Client Name and Month are required.');
       return;
     }
@@ -144,6 +147,7 @@ export default function NewEntryModal({ onClose, onSaved, defaultTab = 'india', 
     // Safely cast number fields before pushing to DB
     const payload = {
         ...form,
+        month: finalMonth,
         year: parseInt(form.year, 10) || 2026,
         roAmount: parseFloat(form.roAmount) || 0,
         billingAmt: parseFloat(form.billingAmt) || 0,
@@ -152,6 +156,7 @@ export default function NewEntryModal({ onClose, onSaved, defaultTab = 'india', 
         inrBillingAmt: parseFloat(form.inrBillingAmt) || 0,
     };
     delete (payload as any).billingFrequency;
+    delete (payload as any).monthRaw;
 
     let bodyPayload: any = payload;
 
@@ -167,7 +172,7 @@ export default function NewEntryModal({ onClose, onSaved, defaultTab = 'india', 
           const splitBilling = payload.billingAmt / monthsCount;
           const splitInrBilling = payload.inrBillingAmt / monthsCount;
           
-          let baseDate = new Date(`${toMonthInput(form.month)}-01T00:00:00`);
+          let baseDate = new Date(`${form.monthRaw}-01T00:00:00`);
           if (isNaN(baseDate.getTime())) {
             baseDate = new Date(); // fallback
           }
@@ -264,7 +269,7 @@ export default function NewEntryModal({ onClose, onSaved, defaultTab = 'india', 
           {/* Row 1 – Month */}
           <div>
             <label className={labelCls}>Month & Year *</label>
-            <input type="month" value={toMonthInput(form.month)} onChange={(e) => setForm(f => ({ ...f, month: fromMonthInput(e.target.value) }))} className={inputCls} required />
+            <input type="month" value={form.monthRaw} onChange={set('monthRaw')} className={inputCls} required />
           </div>
 
           {/* Row 2 */}
