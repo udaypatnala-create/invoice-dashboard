@@ -38,6 +38,34 @@ const BASE_COLS = [
   { label: 'Sales', key: 'salesContact' },
 ];
 
+const MERGEABLE_COLS = ['campaignName', 'roNumber', 'roAmount', 'inrRoAmount', 'xFactor', 'currency'];
+
+const computeRowSpans = (rows: InvoiceRow[]) => {
+  const spans: Record<string, number[]> = {};
+  MERGEABLE_COLS.forEach(key => {
+    spans[key] = new Array(rows.length).fill(1);
+  });
+
+  for (let i = 1; i < rows.length; i++) {
+    const prevRo = String(rows[i - 1].roNumber || '').trim();
+    const currRo = String(rows[i].roNumber || '').trim();
+
+    if (currRo !== '' && currRo === prevRo) {
+      MERGEABLE_COLS.forEach(key => {
+        const prevVal = String((rows[i - 1] as any)[key] || '').trim();
+        const currVal = String((rows[i] as any)[key] || '').trim();
+        if (currVal === prevVal) {
+          spans[key][i] = 0;
+          let k = i - 1;
+          while (k >= 0 && spans[key][k] === 0) k--;
+          if (k >= 0) spans[key][k] += 1;
+        }
+      });
+    }
+  }
+  return spans;
+};
+
 export default function InvoiceTable({ rows, activeTab, onRowUpdated }: InvoiceTableProps) {
   const [sortKey, setSortKey] = useState<string>('month');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
@@ -71,6 +99,7 @@ export default function InvoiceTable({ rows, activeTab, onRowUpdated }: InvoiceT
 
   const totalPages = Math.max(1, Math.ceil(sorted.length / PAGE_SIZE));
   const pageRows = sorted.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const rowSpans = computeRowSpans(pageRows);
 
   function toggleSort(key: string) {
     if (sortKey === key) setSortDir(d => d === 'asc' ? 'desc' : 'asc');
@@ -195,11 +224,22 @@ export default function InvoiceTable({ rows, activeTab, onRowUpdated }: InvoiceT
                   key={row.id}
                   className={`border-b border-gray-50 dark:border-slate-800/50 transition-colors ${i % 2 === 0 ? 'bg-white dark:bg-slate-900' : 'bg-gray-50/40 dark:bg-slate-800/40'} hover:bg-blue-50/20 dark:hover:bg-slate-800/60`}
                 >
-                  {visibleCols.map(col => (
-                    <td key={col.key} className="px-4 py-3 text-gray-700 dark:text-slate-300 whitespace-nowrap">
-                      {renderCell(row, col.key)}
-                    </td>
-                  ))}
+                  {visibleCols.map(col => {
+                    if (MERGEABLE_COLS.includes(col.key)) {
+                      const span = rowSpans[col.key][i];
+                      if (span === 0) return null;
+                      return (
+                        <td key={col.key} rowSpan={span} className={`px-4 py-3 text-gray-700 dark:text-slate-300 whitespace-nowrap ${span > 1 ? 'align-middle bg-white dark:bg-slate-900 border-x border-gray-50/50 dark:border-slate-800/30' : ''}`}>
+                          {renderCell(row, col.key)}
+                        </td>
+                      );
+                    }
+                    return (
+                      <td key={col.key} className="px-4 py-3 text-gray-700 dark:text-slate-300 whitespace-nowrap">
+                        {renderCell(row, col.key)}
+                      </td>
+                    );
+                  })}
                   <td className="px-4 py-3 whitespace-nowrap">
                     <div className="flex gap-2">
                       <button
