@@ -34,16 +34,16 @@ export default function DashboardMetrics({ rows }: MetricsProps) {
       className: 'border-l-4 border-blue-500',
     },
     {
-      label: 'Total Billing Amount',
-      value: formatINR(totalBilling),
-      icon: '💰',
-      className: 'border-l-4 border-green-500',
-    },
-    {
       label: 'Total RO Amount',
       value: formatINR(totalRO),
       icon: '📊',
       className: 'border-l-4 border-purple-500',
+    },
+    {
+      label: 'Total Billing Amount',
+      value: formatINR(totalBilling),
+      icon: '💰',
+      className: 'border-l-4 border-green-500',
     },
   ];
 

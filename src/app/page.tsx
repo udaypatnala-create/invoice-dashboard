@@ -136,8 +136,6 @@ export default function Dashboard() {
               <p className="text-sm text-gray-400 dark:text-slate-400 mt-0.5">2026 Data — {activeTabLabel}</p>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-xs text-gray-400 dark:text-slate-400 font-medium">Year files:</span>
-              <span className="px-2 py-0.5 bg-blue-600 text-white text-xs font-semibold rounded-full">2026</span>
             </div>
           </div>
           <TimeFilter

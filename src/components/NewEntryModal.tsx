@@ -10,6 +10,28 @@ interface NewEntryModalProps {
   editData?: InvoiceRow | null;
 }
 
+const toMonthInput = (val: string) => {
+  if (!val) return '';
+  const parts = val.split('-');
+  if (parts.length !== 2) return '';
+  const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  let m = monthNames.indexOf(parts[0]) + 1;
+  let y = parts[1];
+  if (m === 0) return '';
+  return `20${y}-${m.toString().padStart(2, '0')}`;
+};
+
+const fromMonthInput = (val: string) => {
+  if (!val) return '';
+  const parts = val.split('-');
+  if (parts.length !== 2) return '';
+  const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  let m = parseInt(parts[1], 10) - 1;
+  let y = parts[0].slice(2);
+  if (m < 0 || m > 11) return '';
+  return `${monthNames[m]}-${y}`;
+};
+
 const STATUS_OPTIONS = [
   'Running',
   'Completed',
@@ -193,7 +215,7 @@ export default function NewEntryModal({ onClose, onSaved, defaultTab = 'india', 
           {/* Row 1 – Month */}
           <div>
             <label className={labelCls}>Month & Year *</label>
-            <input type="text" value={form.month} onChange={set('month')} className={inputCls} required placeholder="e.g. Jan-26" />
+            <input type="month" value={toMonthInput(form.month)} onChange={(e) => setForm(f => ({ ...f, month: fromMonthInput(e.target.value) }))} className={inputCls} required />
           </div>
 
           {/* Row 2 */}
