@@ -154,7 +154,7 @@ export default function Dashboard() {
         {!loading && !error && activeTab !== 'summary' && (
           <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm p-5 border border-gray-100 dark:border-slate-800">
             <h2 className="text-xs font-semibold text-gray-400 dark:text-slate-500 uppercase tracking-wide mb-3">Summary — {activeTabLabel}</h2>
-            <DashboardMetrics rows={tabRows} />
+            <DashboardMetrics rows={tabRows} activeTab={activeTab} />
           </div>
         )}
 

@@ -26,7 +26,7 @@ const BASE_COLS = [
   { label: 'Ops', key: 'opsName' },
   { label: 'Status', key: 'status' },
   { label: 'Currency', key: 'currency', foreignOnly: true },
-  { label: 'RO Amount', key: 'roAmount' },
+  { label: 'RO Amount', key: 'roAmount', hideOn: ['google_networks'] },
   { label: 'X Factor', key: 'xFactor', foreignOnly: true },
   { label: 'INR RO Amt', key: 'inrRoAmount', foreignOnly: true },
   { label: 'Billing Amt', key: 'billingAmt' },
@@ -176,6 +176,7 @@ export default function InvoiceTable({ rows, activeTab, onRowUpdated }: InvoiceT
   }
 
   const visibleCols = BASE_COLS.filter(col => {
+    if ((col as any).hideOn && (col as any).hideOn.includes(activeTab)) return false;
     if (!col.foreignOnly) return true;
     return activeTab === 'foreign';
   });

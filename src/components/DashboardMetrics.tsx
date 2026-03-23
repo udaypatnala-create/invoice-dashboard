@@ -5,9 +5,10 @@ import type { InvoiceRow } from '@/types/invoice';
 
 interface MetricsProps {
   rows: InvoiceRow[];
+  activeTab?: string;
 }
 
-export default function DashboardMetrics({ rows }: MetricsProps) {
+export default function DashboardMetrics({ rows, activeTab }: MetricsProps) {
   const totalBilling = rows.reduce((s, r) => s + (Number(r.inrBillingAmt) || Number(r.billingAmt) || 0), 0);
   
   let totalRO = 0;
@@ -61,10 +62,15 @@ export default function DashboardMetrics({ rows }: MetricsProps) {
     },
   ];
 
+  let finalCards = cards;
+  if (activeTab === 'google_networks') {
+    finalCards = cards.filter(c => c.label !== 'Total RO Amount');
+  }
+
   return (
     <div>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
-        {cards.map(card => (
+        {finalCards.map(card => (
           <div
             key={card.label}
             className={`bg-white dark:bg-slate-900 rounded-xl px-5 py-4 shadow-sm ${card.className}`}
