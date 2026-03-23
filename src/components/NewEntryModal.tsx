@@ -69,6 +69,7 @@ export default function NewEntryModal({ onClose, onSaved, defaultTab = 'india', 
     inrRoAmount: '',
     inrBillingAmt: '',
     billingStatus: 'Unpaid',
+    billingFrequency: 'End of Campaign',
   });
   
   const [loading, setLoading] = useState(false);
@@ -102,6 +103,7 @@ export default function NewEntryModal({ onClose, onSaved, defaultTab = 'india', 
         inrRoAmount: String(editData.inrRoAmount || ''),
         inrBillingAmt: String(editData.inrBillingAmt || ''),
         billingStatus: editData.billingStatus || 'Unpaid',
+        billingFrequency: 'End of Campaign',
       });
     }
   }, [editData, defaultTab]);
@@ -149,11 +151,46 @@ export default function NewEntryModal({ onClose, onSaved, defaultTab = 'india', 
         inrRoAmount: parseFloat(form.inrRoAmount) || 0,
         inrBillingAmt: parseFloat(form.inrBillingAmt) || 0,
     };
+    delete (payload as any).billingFrequency;
+
+    let bodyPayload: any = payload;
+
+    if (editData) {
+      bodyPayload = { rowId: editData.id, updates: payload };
+    } else {
+      if (form.billingFrequency === 'Monthly' && form.startDate && form.endDate) {
+        const start = new Date(form.startDate);
+        const end = new Date(form.endDate);
+        const monthsCount = (end.getFullYear() - start.getFullYear()) * 12 + (end.getMonth() - start.getMonth()) + 1;
+
+        if (monthsCount > 1) {
+          const splitBilling = payload.billingAmt / monthsCount;
+          const splitInrBilling = payload.inrBillingAmt / monthsCount;
+          
+          let baseDate = new Date(`${toMonthInput(form.month)}-01T00:00:00`);
+          if (isNaN(baseDate.getTime())) {
+            baseDate = new Date(); // fallback
+          }
+
+          const multiPayload = [];
+          for (let i = 0; i < monthsCount; i++) {
+            let rowDate = new Date(baseDate.getFullYear(), baseDate.getMonth() + i, 1);
+            let rowMonthSaved = fromMonthInput(`${rowDate.getFullYear()}-${(rowDate.getMonth() + 1).toString().padStart(2, '0')}`);
+            multiPayload.push({
+              ...payload,
+              month: rowMonthSaved,
+              billingAmt: splitBilling,
+              inrBillingAmt: splitInrBilling,
+            });
+          }
+          bodyPayload = multiPayload;
+        }
+      }
+    }
 
     try {
       const url = '/api/invoices';
       const method = editData ? 'PATCH' : 'POST';
-      const bodyPayload = editData ? { rowId: editData.id, updates: payload } : payload;
 
       const res = await fetch(url, {
         method,
@@ -211,6 +248,18 @@ export default function NewEntryModal({ onClose, onSaved, defaultTab = 'india', 
               ))}
             </select>
           </div>
+
+          {/* Billing Frequency (Only for New Entry) */}
+          {!editData && (
+            <div>
+              <label className={labelCls}>Billing Frequency</label>
+              <select value={form.billingFrequency} onChange={set('billingFrequency')} className={inputCls}>
+                <option value="End of Campaign">End of Campaign</option>
+                <option value="Monthly">Monthly</option>
+              </select>
+              <p className="text-xs text-blue-500 mt-1">If Monthly, rows will be split equally based on duration</p>
+            </div>
+          )}
 
           {/* Row 1 – Month */}
           <div>
@@ -301,11 +350,11 @@ export default function NewEntryModal({ onClose, onSaved, defaultTab = 'india', 
           <div className="grid grid-cols-3 gap-4">
             <div>
               <label className={labelCls}>Start Date</label>
-              <input type="date" value={form.startDate} onChange={set('startDate')} className={inputCls} />
+              <input type="date" value={form.startDate} onChange={set('startDate')} className={inputCls} required={form.billingFrequency === 'Monthly'} />
             </div>
             <div>
               <label className={labelCls}>End Date</label>
-              <input type="date" value={form.endDate} onChange={set('endDate')} className={inputCls} />
+              <input type="date" value={form.endDate} onChange={set('endDate')} className={inputCls} required={form.billingFrequency === 'Monthly'} />
             </div>
             <div>
               <label className={labelCls}>Invoice Date</label>

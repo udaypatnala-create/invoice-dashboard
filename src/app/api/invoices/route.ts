@@ -21,10 +21,17 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const colRef = collection(db, 'invoices');
-    await addDoc(colRef, {
-      ...body,
-      createdAt: new Date().toISOString()
-    });
+    
+    if (Array.isArray(body)) {
+      await Promise.all(
+        body.map(item => addDoc(colRef, { ...item, createdAt: new Date().toISOString() }))
+      );
+    } else {
+      await addDoc(colRef, {
+        ...body,
+        createdAt: new Date().toISOString()
+      });
+    }
     return NextResponse.json({ success: true });
   } catch (e: any) {
     return NextResponse.json({ success: false, error: String(e) }, { status: 500 });

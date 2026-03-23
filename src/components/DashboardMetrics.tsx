@@ -9,7 +9,21 @@ interface MetricsProps {
 
 export default function DashboardMetrics({ rows }: MetricsProps) {
   const totalBilling = rows.reduce((s, r) => s + (Number(r.inrBillingAmt) || Number(r.billingAmt) || 0), 0);
-  const totalRO = rows.reduce((s, r) => s + (Number(r.inrRoAmount) || Number(r.roAmount) || 0), 0);
+  
+  let totalRO = 0;
+  const seenROs = new Set<string>();
+  rows.forEach(r => {
+    const val = Number(r.inrRoAmount) || Number(r.roAmount) || 0;
+    if (r.roNumber && r.roNumber.trim() !== '') {
+      const key = r.roNumber.trim().toLowerCase();
+      if (!seenROs.has(key)) {
+        totalRO += val;
+        seenROs.add(key);
+      }
+    } else {
+      totalRO += val;
+    }
+  });
   const totalInvoices = rows.length;
 
   const statusCounts = rows.reduce<Record<string, number>>((acc, r) => {
