@@ -1,12 +1,13 @@
 'use client';
-import React, { useState } from 'react';
-import type { SheetTab } from '@/types/invoice';
+import React, { useState, useEffect } from 'react';
+import type { SheetTab, InvoiceRow } from '@/types/invoice';
 import { TAB_LABELS } from '@/types/invoice';
 
 interface NewEntryModalProps {
   onClose: () => void;
   onSaved: () => void;
   defaultTab?: SheetTab;
+  editData?: InvoiceRow | null;
 }
 
 const STATUS_OPTIONS = [
@@ -20,7 +21,7 @@ const STATUS_OPTIONS = [
 
 const PLATFORM_OPTIONS = ['Mobile', 'Desktop', 'CTV', 'Other'];
 
-export default function NewEntryModal({ onClose, onSaved, defaultTab = 'india' }: NewEntryModalProps) {
+export default function NewEntryModal({ onClose, onSaved, defaultTab = 'india', editData }: NewEntryModalProps) {
   const [form, setForm] = useState({
     sheetTab: defaultTab,
     month: '',
@@ -47,8 +48,41 @@ export default function NewEntryModal({ onClose, onSaved, defaultTab = 'india' }
     inrBillingAmt: '',
     billingStatus: 'Unpaid',
   });
+  
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  // Hydrate form if editing
+  useEffect(() => {
+    if (editData) {
+      setForm({
+        sheetTab: editData.sheetTab || defaultTab,
+        month: editData.month || '',
+        year: String(editData.year || '2026'),
+        clientName: editData.clientName || '',
+        campaignName: editData.campaignName || '',
+        roNumber: editData.roNumber || '',
+        series: editData.series || '',
+        opsName: editData.opsName || '',
+        status: editData.status || 'Running',
+        orderId: editData.orderId || '',
+        roAmount: String(editData.roAmount || ''),
+        billingAmt: String(editData.billingAmt || ''),
+        startDate: (editData as any).startDateRaw ? String((editData as any).startDateRaw) : '',
+        endDate: (editData as any).endDateRaw ? String((editData as any).endDateRaw) : '',
+        invDate: editData.invDate || '',
+        invNumber: editData.invNumber || '',
+        comment: editData.comment || '',
+        platform: editData.platform || 'Mobile',
+        salesContact: editData.salesContact || '',
+        currency: editData.currency || '',
+        xFactor: String(editData.xFactor || ''),
+        inrRoAmount: String(editData.inrRoAmount || ''),
+        inrBillingAmt: String(editData.inrBillingAmt || ''),
+        billingStatus: editData.billingStatus || 'Unpaid',
+      });
+    }
+  }, [editData, defaultTab]);
 
   const set = (k: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
     setForm(f => ({ ...f, [k]: e.target.value }));
@@ -72,7 +106,7 @@ export default function NewEntryModal({ onClose, onSaved, defaultTab = 'india' }
     });
   };
 
-  const showForeignFields = ['foreign', 'pg_sales', 'google_networks'].includes(form.sheetTab);
+  const showForeignFields = ['foreign', 'pg_sales'].includes(form.sheetTab);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -82,11 +116,27 @@ export default function NewEntryModal({ onClose, onSaved, defaultTab = 'india' }
     }
     setLoading(true);
     setError('');
+    
+    // Safely cast number fields before pushing to DB
+    const payload = {
+        ...form,
+        year: parseInt(form.year, 10) || 2026,
+        roAmount: parseFloat(form.roAmount) || 0,
+        billingAmt: parseFloat(form.billingAmt) || 0,
+        xFactor: parseFloat(form.xFactor) || 1,
+        inrRoAmount: parseFloat(form.inrRoAmount) || 0,
+        inrBillingAmt: parseFloat(form.inrBillingAmt) || 0,
+    };
+
     try {
-      const res = await fetch('/api/invoices', {
-        method: 'POST',
+      const url = '/api/invoices';
+      const method = editData ? 'PATCH' : 'POST';
+      const bodyPayload = editData ? { rowId: editData.id, updates: payload } : payload;
+
+      const res = await fetch(url, {
+        method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+        body: JSON.stringify(bodyPayload),
       });
       const json = await res.json();
       if (json.success) {
@@ -112,8 +162,8 @@ export default function NewEntryModal({ onClose, onSaved, defaultTab = 'india' }
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-slate-800 sticky top-0 bg-white dark:bg-slate-900 rounded-t-2xl z-10">
           <div>
-            <h2 className="text-lg font-bold text-gray-900 dark:text-white">New Invoice Entry</h2>
-            <p className="text-xs text-gray-400 dark:text-slate-400 mt-0.5">Add a new row to the Excel file</p>
+            <h2 className="text-lg font-bold text-gray-900 dark:text-white">{editData ? 'Edit Invoice' : 'New Invoice Entry'}</h2>
+            <p className="text-xs text-gray-400 dark:text-slate-400 mt-0.5">{editData ? 'Modify this record' : 'Add a new row to the database'}</p>
           </div>
           <button
             onClick={onClose}
@@ -133,7 +183,7 @@ export default function NewEntryModal({ onClose, onSaved, defaultTab = 'india' }
           {/* Row 0 – Sheet */}
           <div>
             <label className={labelCls}>Sheet / Category</label>
-            <select value={form.sheetTab} onChange={set('sheetTab')} className={inputCls}>
+            <select value={form.sheetTab} onChange={set('sheetTab')} className={inputCls} disabled={!!editData}>
               {(Object.entries(TAB_LABELS) as [string, string][]).map(([key, label]) => (
                 <option key={key} value={key}>{label}</option>
               ))}
@@ -143,7 +193,7 @@ export default function NewEntryModal({ onClose, onSaved, defaultTab = 'india' }
           {/* Row 1 – Month */}
           <div>
             <label className={labelCls}>Month & Year *</label>
-            <input type="month" value={form.month} onChange={set('month')} className={inputCls} required />
+            <input type="text" value={form.month} onChange={set('month')} className={inputCls} required placeholder="e.g. Jan-26" />
           </div>
 
           {/* Row 2 */}
@@ -299,7 +349,7 @@ export default function NewEntryModal({ onClose, onSaved, defaultTab = 'india' }
               disabled={loading}
               className="px-6 py-2 rounded-lg text-sm font-semibold bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-60 transition-colors shadow-sm"
             >
-              {loading ? 'Saving...' : '+ Save Entry'}
+              {loading ? 'Saving...' : (editData ? 'Save Changes' : '+ Save Entry')}
             </button>
           </div>
         </form>
