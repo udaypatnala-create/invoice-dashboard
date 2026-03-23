@@ -12,6 +12,7 @@ interface NewEntryModalProps {
 const STATUS_OPTIONS = [
   'Running',
   'Completed',
+  'Stopped',
   'Invoice Raised',
   'PO Received',
   'Pending',
@@ -40,12 +41,38 @@ export default function NewEntryModal({ onClose, onSaved, defaultTab = 'india' }
     comment: '',
     platform: 'Mobile',
     salesContact: '',
+    currency: '',
+    xFactor: '',
+    inrRoAmount: '',
+    inrBillingAmt: '',
+    billingStatus: 'Unpaid',
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
   const set = (k: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
     setForm(f => ({ ...f, [k]: e.target.value }));
+
+  const setAmount = (k: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const val = e.target.value;
+    setForm(f => {
+      const newF = { ...f, [k]: val };
+      const baseRo = parseFloat(newF.roAmount.replace(/,/g, '')) || 0;
+      const baseBil = parseFloat(newF.billingAmt.replace(/,/g, '')) || 0;
+      const cx = parseFloat(newF.xFactor) || 1;
+      
+      if (newF.currency && newF.currency !== 'INR') {
+        newF.inrRoAmount = String((baseRo * cx).toFixed(2));
+        newF.inrBillingAmt = String((baseBil * cx).toFixed(2));
+      } else {
+        newF.inrRoAmount = String(baseRo);
+        newF.inrBillingAmt = String(baseBil);
+      }
+      return newF;
+    });
+  };
+
+  const showForeignFields = ['foreign', 'pg_sales', 'google_networks'].includes(form.sheetTab);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -76,21 +103,21 @@ export default function NewEntryModal({ onClose, onSaved, defaultTab = 'india' }
   }
 
   const inputCls =
-    'w-full px-3 py-2 rounded-lg border border-gray-200 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white';
-  const labelCls = 'block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1';
+    'w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-slate-700 text-sm text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white dark:bg-slate-800';
+  const labelCls = 'block text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wide mb-1';
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+      <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 sticky top-0 bg-white rounded-t-2xl z-10">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-slate-800 sticky top-0 bg-white dark:bg-slate-900 rounded-t-2xl z-10">
           <div>
-            <h2 className="text-lg font-bold text-gray-900">New Invoice Entry</h2>
-            <p className="text-xs text-gray-400 mt-0.5">Add a new row to the Excel file</p>
+            <h2 className="text-lg font-bold text-gray-900 dark:text-white">New Invoice Entry</h2>
+            <p className="text-xs text-gray-400 dark:text-slate-400 mt-0.5">Add a new row to the Excel file</p>
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:bg-gray-100 hover:text-gray-700 transition-colors text-xl"
+            className="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-800 hover:text-gray-700 dark:hover:text-slate-200 transition-colors text-xl"
           >
             ×
           </button>
@@ -103,23 +130,14 @@ export default function NewEntryModal({ onClose, onSaved, defaultTab = 'india' }
             </div>
           )}
 
-          {/* Row 0 – Sheet + Year */}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className={labelCls}>Sheet / Category</label>
-              <select value={form.sheetTab} onChange={set('sheetTab')} className={inputCls}>
-                {(Object.entries(TAB_LABELS) as [string, string][]).map(([key, label]) => (
-                  <option key={key} value={key}>{label}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className={labelCls}>File Year</label>
-              <select value={form.year} onChange={set('year')} className={inputCls}>
-                <option value="2025">2025 File</option>
-                <option value="2026">2026 File</option>
-              </select>
-            </div>
+          {/* Row 0 – Sheet */}
+          <div>
+            <label className={labelCls}>Sheet / Category</label>
+            <select value={form.sheetTab} onChange={set('sheetTab')} className={inputCls}>
+              {(Object.entries(TAB_LABELS) as [string, string][]).map(([key, label]) => (
+                <option key={key} value={key}>{label}</option>
+              ))}
+            </select>
           </div>
 
           {/* Row 1 – Month */}
@@ -170,13 +188,42 @@ export default function NewEntryModal({ onClose, onSaved, defaultTab = 'india' }
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className={labelCls}>RO Amount</label>
-              <input type="text" value={form.roAmount} onChange={set('roAmount')} className={inputCls} placeholder="₹ 3,75,000.00" />
+              <input type="text" value={form.roAmount} onChange={setAmount('roAmount')} className={inputCls} placeholder="e.g. 375000" />
             </div>
             <div>
               <label className={labelCls}>Billing Amount</label>
-              <input type="text" value={form.billingAmt} onChange={set('billingAmt')} className={inputCls} placeholder="₹ 3,75,000.00" />
+              <input type="text" value={form.billingAmt} onChange={setAmount('billingAmt')} className={inputCls} placeholder="e.g. 375000" />
             </div>
           </div>
+
+          {/* Row Foreign */}
+          {showForeignFields && (
+            <>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className={labelCls}>Currency</label>
+                  <select value={form.currency} onChange={setAmount('currency')} className={inputCls}>
+                    <option value="">--</option>
+                    {['USD', 'GBP', 'CAD', 'EUR', 'AUD', 'AED', 'SGD'].map(c => <option key={c} value={c}>{c}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className={labelCls}>X Factor (Manual Exchange Rate)</label>
+                  <input type="number" step="0.01" value={form.xFactor} onChange={setAmount('xFactor')} className={inputCls} placeholder="e.g. 83.50" />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className={labelCls}>INR RO Amount</label>
+                  <input type="text" value={form.inrRoAmount} readOnly className={`${inputCls} bg-gray-50 dark:bg-slate-800/80 text-gray-400 dark:text-slate-500`} placeholder="Auto calculated" />
+                </div>
+                <div>
+                  <label className={labelCls}>INR Billing</label>
+                  <input type="text" value={form.inrBillingAmt} readOnly className={`${inputCls} bg-gray-50 dark:bg-slate-800/80 text-gray-400 dark:text-slate-500`} placeholder="Auto calculated" />
+                </div>
+              </div>
+            </>
+          )}
 
           {/* Row 6 - Dates */}
           <div className="grid grid-cols-3 gap-4">
@@ -220,6 +267,18 @@ export default function NewEntryModal({ onClose, onSaved, defaultTab = 'india' }
             </div>
           </div>
 
+          {/* Billing Status */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className={labelCls}>Billing Status</label>
+              <select value={form.billingStatus} onChange={set('billingStatus')} className={inputCls}>
+                <option value="Unpaid">Unpaid</option>
+                <option value="Paid">Paid</option>
+                <option value="Pending">Pending</option>
+              </select>
+            </div>
+          </div>
+
           {/* Comment */}
           <div>
             <label className={labelCls}>Comment</label>
@@ -231,7 +290,7 @@ export default function NewEntryModal({ onClose, onSaved, defaultTab = 'india' }
             <button
               type="button"
               onClick={onClose}
-              className="px-5 py-2 rounded-lg text-sm font-medium border border-gray-200 text-gray-600 bg-white hover:bg-gray-50 transition-colors"
+              className="px-5 py-2 rounded-lg text-sm font-medium border border-gray-200 dark:border-slate-700 text-gray-600 dark:text-slate-300 bg-white dark:bg-slate-800 hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
             >
               Cancel
             </button>

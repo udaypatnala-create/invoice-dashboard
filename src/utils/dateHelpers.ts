@@ -13,21 +13,22 @@ export function parseExcelDate(raw: string | number | undefined | null): Date | 
     if (!isNaN(d.getTime())) return d;
   }
 
-  // "28-Feb-26" or "1-Feb-26" style
-  const shortYear = rawStr.match(/^(\d{1,2})-([A-Za-z]{3})-(\d{2})$/);
-  if (shortYear) {
-    const [, day, mon, yr] = shortYear;
-    const year = parseInt(yr, 10) + (parseInt(yr, 10) < 50 ? 2000 : 1900);
-    const d = new Date(`${day} ${mon} ${year}`);
-    if (!isNaN(d.getTime())) return d;
+  // DD/MM/YYYY or D/M/YYYY
+  const dmY = rawStr.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+  if (dmY) {
+    const [, d, m, y] = dmY;
+    const date = new Date(parseInt(y, 10), parseInt(m, 10) - 1, parseInt(d, 10));
+    if (!isNaN(date.getTime())) return date;
   }
 
-  // "16-Dec-2024" or "7-Jan-2025" style
-  const longDate = rawStr.match(/^(\d{1,2})-([A-Za-z]{3})-(\d{4})$/);
-  if (longDate) {
-    const [, day, mon, year] = longDate;
-    const d = new Date(`${day} ${mon} ${year}`);
-    if (!isNaN(d.getTime())) return d;
+  // MM/DD/YYYY or M/D/YYYY (only if day > 12)
+  const mdY = rawStr.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+  if (mdY) {
+    const [, m, d, y] = mdY;
+    if (parseInt(d, 10) > 12) {
+        const date = new Date(parseInt(y, 10), parseInt(m, 10) - 1, parseInt(d, 10));
+        if (!isNaN(date.getTime())) return date;
+    }
   }
 
   // ISO or "YYYY-MM-DD"

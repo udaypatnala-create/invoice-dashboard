@@ -46,7 +46,7 @@ export default function TimeFilter({
           className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 border ${
             filter === tab.value
               ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
-              : 'bg-white text-gray-600 border-gray-200 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-300'
+              : 'bg-white dark:bg-slate-800 text-gray-600 dark:text-slate-300 border-gray-200 dark:border-slate-700 hover:bg-blue-50 dark:hover:bg-slate-700 hover:text-blue-600 dark:hover:text-blue-400 hover:border-blue-300 dark:hover:border-slate-600'
           }`}
         >
           {tab.label}
@@ -58,7 +58,7 @@ export default function TimeFilter({
           type="month"
           value={specificMonth}
           onChange={e => onSpecificMonthChange(e.target.value)}
-          className="ml-2 px-3 py-2 rounded-lg border border-gray-200 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-400"
+          className="ml-2 px-3 py-2 rounded-lg border border-gray-200 dark:border-slate-700 text-sm text-gray-700 dark:text-slate-200 bg-transparent dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-400"
         />
       )}
 
@@ -68,14 +68,14 @@ export default function TimeFilter({
             type="date"
             value={customFrom}
             onChange={e => onCustomFromChange(e.target.value)}
-            className="px-3 py-2 rounded-lg border border-gray-200 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="px-3 py-2 rounded-lg border border-gray-200 dark:border-slate-700 text-sm text-gray-700 dark:text-slate-200 bg-transparent dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-400"
           />
-          <span className="text-gray-400 text-sm">to</span>
+          <span className="text-gray-400 dark:text-slate-500 text-sm">to</span>
           <input
             type="date"
             value={customTo}
             onChange={e => onCustomToChange(e.target.value)}
-            className="px-3 py-2 rounded-lg border border-gray-200 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="px-3 py-2 rounded-lg border border-gray-200 dark:border-slate-700 text-sm text-gray-700 dark:text-slate-200 bg-transparent dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-400"
           />
         </div>
       )}

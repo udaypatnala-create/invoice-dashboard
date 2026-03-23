@@ -102,10 +102,10 @@ export default function Dashboard() {
   const activeTabLabel = activeTab === 'summary' ? 'All' : TAB_LABELS[activeTab];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-slate-950">
       {/* Navbar */}
-      <nav className="bg-blue-700 shadow-md sticky top-0 z-40">
-        <div className="max-w-screen-xl mx-auto px-4 sm:px-6 flex items-center justify-between h-14">
+      <nav className="bg-blue-700 dark:bg-slate-900 shadow-md sticky top-0 z-40 dark:border-b dark:border-slate-800">
+        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 flex items-center justify-between h-14">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
               <span className="text-white text-lg">📋</span>
@@ -118,7 +118,7 @@ export default function Dashboard() {
             </span>
             <button
               onClick={() => setShowModal(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-white text-blue-700 rounded-lg text-sm font-semibold hover:bg-blue-50 transition-colors shadow-sm"
+              className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-blue-600 text-blue-700 dark:text-white rounded-lg text-sm font-semibold hover:bg-blue-50 dark:hover:bg-blue-700 transition-colors shadow-sm dark:border dark:border-blue-500"
             >
               <span className="text-base">+</span> New Entry
             </button>
@@ -126,18 +126,17 @@ export default function Dashboard() {
         </div>
       </nav>
 
-      <main className="max-w-screen-xl mx-auto px-4 sm:px-6 py-6 space-y-4">
+      <main className="max-w-[1600px] mx-auto px-4 sm:px-6 py-6 space-y-4">
 
         {/* Title + Time Filter */}
-        <div className="bg-white rounded-2xl shadow-sm p-5 border border-gray-100">
+        <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm p-5 border border-gray-100 dark:border-slate-800">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Billing Overview</h1>
-              <p className="text-sm text-gray-400 mt-0.5">2025 & 2026 Combined — {activeTabLabel}</p>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Billing Overview</h1>
+              <p className="text-sm text-gray-400 dark:text-slate-400 mt-0.5">2026 Data — {activeTabLabel}</p>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-xs text-gray-400 font-medium">Year files:</span>
-              <span className="px-2 py-0.5 bg-blue-100 text-blue-700 text-xs font-semibold rounded-full">2025</span>
+              <span className="text-xs text-gray-400 dark:text-slate-400 font-medium">Year files:</span>
               <span className="px-2 py-0.5 bg-blue-600 text-white text-xs font-semibold rounded-full">2026</span>
             </div>
           </div>
@@ -155,16 +154,16 @@ export default function Dashboard() {
 
         {/* Metrics (hidden on summary tab, shown per-tab) */}
         {!loading && !error && activeTab !== 'summary' && (
-          <div className="bg-white rounded-2xl shadow-sm p-5 border border-gray-100">
-            <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">Summary — {activeTabLabel}</h2>
+          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm p-5 border border-gray-100 dark:border-slate-800">
+            <h2 className="text-xs font-semibold text-gray-400 dark:text-slate-500 uppercase tracking-wide mb-3">Summary — {activeTabLabel}</h2>
             <DashboardMetrics rows={tabRows} />
           </div>
         )}
 
         {/* Sheet Tabs */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-800 overflow-hidden">
           {/* Tab bar */}
-          <div className="px-4 pt-4 border-b border-gray-100 bg-gray-50/60">
+          <div className="px-4 pt-4 border-b border-gray-100 dark:border-slate-800 bg-gray-50/60 dark:bg-slate-800/50">
             <SheetTabs
               active={activeTab}
               onTabChange={tab => setActiveTab(tab)}
@@ -197,7 +196,7 @@ export default function Dashboard() {
             {!loading && !error && activeTab !== 'summary' && (
               <>
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide">
+                  <h2 className="text-sm font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wide">
                     {TAB_LABELS[activeTab]} Records
                   </h2>
                   <button
@@ -207,7 +206,7 @@ export default function Dashboard() {
                     + New Entry
                   </button>
                 </div>
-                <InvoiceTable rows={tabRows} onRowUpdated={fetchData} />
+                <InvoiceTable rows={tabRows} activeTab={activeTab} onRowUpdated={fetchData} />
               </>
             )}
           </div>

@@ -13,6 +13,15 @@ export interface InvoiceRow {
   roAmountRaw: string;
   billingAmt: number;
   billingAmtRaw: string;
+  // New Foreign Campaign fields
+  currency: string;
+  xFactor: number;
+  exchangeRate: number;
+  inrRoAmount: number;
+  inrBillingAmt: number;
+  inrBillingAmtRaw: string;
+  // New Editing field
+  billingStatus: string;
   startDate: string;
   endDate: string;
   invDate: string;
