@@ -59,7 +59,7 @@ export default function SummaryDashboard({ allRows }: SummaryDashboardProps) {
         <div className="divide-y divide-gray-50 dark:divide-slate-800/50">
           {SHEET_TABS.map(tab => {
             const rows = bySheet[tab];
-            const billing = rows.reduce((s, r) => s + r.billingAmt, 0);
+            const billing = rows.reduce((s, r) => s + (tab === 'google_networks' ? (r.inrBillingAmt || 0) : r.billingAmt), 0);
             const ro = rows.reduce((s, r) => s + r.roAmount, 0);
             const completed = rows.filter(r => r.status === 'Completed').length;
             const running = rows.filter(r => r.status === 'Running').length;

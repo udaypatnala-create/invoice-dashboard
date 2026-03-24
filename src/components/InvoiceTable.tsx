@@ -21,21 +21,21 @@ const STATUS_COLORS: Record<string, string> = {
 const BASE_COLS = [
   { label: 'Month', key: 'month' },
   { label: 'Client', key: 'clientName' },
-  { label: 'Campaign', key: 'campaignName' },
-  { label: 'RO #', key: 'roNumber' },
-  { label: 'Ops', key: 'opsName' },
-  { label: 'Status', key: 'status' },
+  { label: 'Campaign', key: 'campaignName', hideOn: ['google_networks'] },
+  { label: 'RO #', key: 'roNumber', hideOn: ['google_networks'] },
+  { label: 'Ops', key: 'opsName', hideOn: ['google_networks'] },
+  { label: 'Status', key: 'status', hideOn: ['google_networks'] },
   { label: 'Currency', key: 'currency', foreignOnly: true },
   { label: 'RO Amount', key: 'roAmount', hideOn: ['google_networks'] },
-  { label: 'X Factor', key: 'xFactor', foreignOnly: true },
+  { label: 'X Factor', key: 'xFactor', showOn: ['foreign', 'google_networks'] },
   { label: 'INR RO Amt', key: 'inrRoAmount', foreignOnly: true },
   { label: 'Billing Amt', key: 'billingAmt' },
-  { label: 'INR Billing', key: 'inrBillingAmt', foreignOnly: true },
+  { label: 'INR Billing', key: 'inrBillingAmt', showOn: ['foreign', 'google_networks'] },
   { label: 'Inv Date', key: 'invDate' },
   { label: 'Inv #', key: 'invNumber' },
-  { label: 'Billing Status', key: 'billingStatus' },
-  { label: 'Platform', key: 'platform' },
-  { label: 'Sales', key: 'salesContact' },
+  { label: 'Billing Status', key: 'billingStatus', hideOn: ['google_networks'] },
+  { label: 'Platform', key: 'platform', hideOn: ['google_networks'] },
+  { label: 'Sales', key: 'salesContact', hideOn: ['google_networks'] },
 ];
 
 const MERGEABLE_COLS = ['campaignName', 'roNumber', 'roAmount', 'inrRoAmount', 'xFactor', 'currency'];
@@ -177,6 +177,7 @@ export default function InvoiceTable({ rows, activeTab, onRowUpdated }: InvoiceT
 
   const visibleCols = BASE_COLS.filter(col => {
     if ((col as any).hideOn && (col as any).hideOn.includes(activeTab)) return false;
+    if ((col as any).showOn) return (col as any).showOn.includes(activeTab);
     if (!col.foreignOnly) return true;
     return activeTab === 'foreign';
   });

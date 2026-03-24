@@ -130,7 +130,7 @@ export default function NewEntryModal({ onClose, onSaved, defaultTab = 'india', 
     });
   };
 
-  const showForeignFields = ['foreign', 'pg_sales'].includes(form.sheetTab);
+  const showForeignFields = ['foreign', 'pg_sales', 'google_networks'].includes(form.sheetTab);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
